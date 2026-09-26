@@ -34,6 +34,7 @@ export interface Miembro {
   lider_id: string | null;
   foto_url: string | null;
   total_aportado: number;
+  sociedad: 'Caballero' | 'Dama' | 'Joven' | 'Niños';
   fecha_ultima_asistencia: string | null;
   qr_code: string | null;
   created_at: string;
@@ -60,6 +61,8 @@ export interface Asistencia {
   tipo_servicio: string;
   miembros_presentes: string[];
   total: number;
+  predicador: string;
+  titulo_mensaje: string;
   created_at: string;
 }
 

@@ -5,6 +5,7 @@ import type { Miembro, Screen } from '@/types';
 import { Html5Qrcode } from 'html5-qrcode';
 import {
   ArrowLeft, ScanLine, Search, Check, X, Loader2, UserPlus, Users, Calendar,
+  MicVocal, BookOpen,
 } from 'lucide-react';
 
 interface Props {
@@ -19,6 +20,8 @@ interface Presente {
 export default function AsistenciaQR({ onNavigate }: Props) {
   const { iglesia } = useAuth();
   const [tipoServicio, setTipoServicio] = useState('Domingo AM');
+  const [predicador, setPredicador] = useState('');
+  const [tituloMensaje, setTituloMensaje] = useState('');
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
   const [presentes, setPresentes] = useState<Presente[]>([]);
   const [scanning, setScanning] = useState(false);
@@ -134,6 +137,8 @@ export default function AsistenciaQR({ onNavigate }: Props) {
         tipo_servicio: tipoServicio,
         miembros_presentes: miembrosIds,
         total: miembrosIds.length,
+        predicador: predicador.trim(),
+        titulo_mensaje: tituloMensaje.trim(),
       });
 
       if (error) throw error;
@@ -197,6 +202,28 @@ export default function AsistenciaQR({ onNavigate }: Props) {
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+            <MicVocal className="w-4 h-4 text-[#1E3A8A]" /> Predicador</label>
+          <input
+            type="text"
+            value={predicador}
+            onChange={(e) => setPredicador(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-gray-900"
+            placeholder="Nombre del predicador"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+            <BookOpen className="w-4 h-4 text-[#1E3A8A]" /> Título del Mensaje</label>
+          <input
+            type="text"
+            value={tituloMensaje}
+            onChange={(e) => setTituloMensaje(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-gray-900"
+            placeholder="Título de la predicación"
           />
         </div>
       </div>

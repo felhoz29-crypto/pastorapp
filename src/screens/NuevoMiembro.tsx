@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import type { Screen, Miembro } from '@/types';
 import QRCode from 'qrcode';
-import { ArrowLeft, Loader2, Check, User } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, User, Users } from 'lucide-react';
 
 interface Props {
   onNavigate: (s: Screen) => void;
@@ -20,6 +20,7 @@ export default function NuevoMiembro({ onNavigate }: Props) {
   const [bautizado, setBautizado] = useState(false);
   const [nivelDiscipulado, setNivelDiscipulado] = useState<1 | 2 | 3>(1);
   const [celula, setCelula] = useState('');
+  const [sociedad, setSociedad] = useState<'Caballero' | 'Dama' | 'Joven' | 'Niños'>('Caballero');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -43,6 +44,7 @@ export default function NuevoMiembro({ onNavigate }: Props) {
           bautizado,
           nivel_discipulado: nivelDiscipulado,
           celula,
+          sociedad,
           qr_code: qrCode,
         })
         .select()
@@ -136,6 +138,25 @@ export default function NuevoMiembro({ onNavigate }: Props) {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-gray-900"
               placeholder="Célula 1"
             />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Sociedad *</label>
+          <div className="flex flex-wrap gap-2">
+            {(['Caballero', 'Dama', 'Joven', 'Niños'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSociedad(s)}
+                className={`flex-1 min-w-[80px] py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  sociedad === s
+                    ? 'bg-[#1E3A8A] text-white'
+                    : 'bg-gray-100 text-gray-500'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import type { Transaccion, Screen } from '@/types';
+import type { Transaccion, Miembro, Screen } from '@/types';
 import {
   ArrowLeft, ArrowUpRight, ArrowDownRight, Plus, Wallet, Loader2, FileText,
 } from 'lucide-react';
@@ -15,19 +15,27 @@ interface Props {
 export default function TransaccionesList({ onNavigate }: Props) {
   const { iglesia } = useAuth();
   const [transacciones, setTransacciones] = useState<Transaccion[]>([]);
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<'todos' | 'ingreso' | 'gasto'>('todos');
 
   useEffect(() => {
     if (!iglesia) return;
     (async () => {
-      const { data } = await supabase
-        .from('transacciones')
-        .select('*')
-        .eq('iglesia_id', iglesia.id)
-        .order('fecha', { ascending: false })
-        .limit(100);
-      setTransacciones((data || []) as Transaccion[]);
+      const [transRes, miemRes] = await Promise.all([
+        supabase
+          .from('transacciones')
+          .select('*')
+          .eq('iglesia_id', iglesia.id)
+          .order('fecha', { ascending: false })
+          .limit(100),
+        supabase
+          .from('miembros')
+          .select('id, nombre')
+          .eq('iglesia_id', iglesia.id),
+      ]);
+      setTransacciones((transRes.data || []) as Transaccion[]);
+      setMiembros((miemRes.data || []) as Miembro[]);
       setLoading(false);
     })();
   }, [iglesia]);
@@ -58,15 +66,18 @@ export default function TransaccionesList({ onNavigate }: Props) {
     doc.text(`Gastos: $${totalGastos.toLocaleString('es-CO')}`, 14, 62);
     doc.text(`Saldo: $${(totalIngresos - totalGastos).toLocaleString('es-CO')}`, 14, 68);
 
+    const miembroMap = new Map<string, string>();
+    miembros.forEach((m) => miembroMap.set(m.id, m.nombre));
+
     autoTable(doc, {
       startY: 78,
-      head: [['Fecha', 'Tipo', 'Categoría', 'Forma Pago', 'Monto']],
+      head: [['Miembro', 'Fecha', 'Categoría', 'Forma Pago', 'Monto']],
       body: filtered.map((t) => [
+        t.miembro_id ? (miembroMap.get(t.miembro_id) || '—') : '—',
         new Date(t.fecha).toLocaleDateString('es-CO'),
-        t.tipo,
         t.categoria,
         t.forma_pago,
-        `$${Number(t.monto).toLocaleString('es-CO')}`,
+        `${Number(t.monto).toLocaleString('es-CO')}`,
       ]),
       headStyles: { fillColor: [30, 58, 138] },
       styles: { fontSize: 9 },

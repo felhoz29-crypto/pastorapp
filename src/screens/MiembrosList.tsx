@@ -99,6 +99,9 @@ export default function MiembrosList({ onNavigate, onSelectMiembro }: Props) {
                   {m.bautizado && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Bautizado</span>
                   )}
+                  {m.sociedad && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">{m.sociedad}</span>
+                  )}
                   <span className="text-xs text-gray-400">N{m.nivel_discipulado}</span>
                 </div>
               </div>

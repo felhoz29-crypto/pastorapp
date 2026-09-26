@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import type { Transaccion, Screen } from '@/types';
-import { Loader2, FileText, Download, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import type { Transaccion, Miembro, Screen } from '@/types';
+import { Loader2, FileText, Download, TrendingUp, TrendingDown, Wallet, Users } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -13,6 +13,7 @@ interface Props {
 export default function InformeMensual({ onNavigate }: Props) {
   const { iglesia } = useAuth();
   const [transacciones, setTransacciones] = useState<Transaccion[]>([]);
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [loading, setLoading] = useState(true);
   const [mes, setMes] = useState(new Date().getMonth());
   const [ano, setAno] = useState(new Date().getFullYear());
@@ -23,14 +24,22 @@ export default function InformeMensual({ onNavigate }: Props) {
       setLoading(true);
       const firstDay = new Date(ano, mes, 1).toISOString().split('T')[0];
       const lastDay = new Date(ano, mes + 1, 0).toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('transacciones')
-        .select('*')
-        .eq('iglesia_id', iglesia.id)
-        .gte('fecha', firstDay)
-        .lte('fecha', lastDay)
-        .order('fecha', { ascending: true });
-      setTransacciones((data || []) as Transaccion[]);
+      const [transRes, miemRes] = await Promise.all([
+        supabase
+          .from('transacciones')
+          .select('*, miembro_id')
+          .eq('iglesia_id', iglesia.id)
+          .gte('fecha', firstDay)
+          .lte('fecha', lastDay)
+          .order('fecha', { ascending: true }),
+        supabase
+          .from('miembros')
+          .select('id, nombre, sociedad, estado')
+          .eq('iglesia_id', iglesia.id)
+          .eq('estado', 'activo'),
+      ]);
+      setTransacciones((transRes.data || []) as Transaccion[]);
+      setMiembros((miemRes.data || []) as Miembro[]);
       setLoading(false);
     })();
   }, [iglesia, mes, ano]);
@@ -68,16 +77,19 @@ export default function InformeMensual({ onNavigate }: Props) {
     doc.text(`Total Gastos: $${totalGastos.toLocaleString('es-CO')}`, 14, 74);
     doc.text(`Saldo: $${saldo.toLocaleString('es-CO')}`, 14, 80);
 
+    const miembroMap = new Map<string, string>();
+    miembros.forEach((m) => miembroMap.set(m.id, m.nombre));
+
     // Ingresos table
     autoTable(doc, {
       startY: 90,
-      head: [['Ingresos', 'Fecha', 'Categoría', 'Forma Pago', 'Monto']],
+      head: [['Miembro', 'Fecha', 'Categoría', 'Forma Pago', 'Monto']],
       body: ingresos.map((t) => [
-        t.observacion || t.categoria,
+        t.miembro_id ? (miembroMap.get(t.miembro_id) || '—') : '—',
         new Date(t.fecha).toLocaleDateString('es-CO'),
         t.categoria,
         t.forma_pago,
-        `$${Number(t.monto).toLocaleString('es-CO')}`,
+        `${Number(t.monto).toLocaleString('es-CO')}`,
       ]),
       headStyles: { fillColor: [16, 185, 129] },
       styles: { fontSize: 9 },
@@ -86,15 +98,29 @@ export default function InformeMensual({ onNavigate }: Props) {
     // Gastos table
     autoTable(doc, {
       startY: (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10,
-      head: [['Gastos', 'Fecha', 'Categoría', 'Forma Pago', 'Monto']],
+      head: [['Miembro', 'Fecha', 'Categoría', 'Forma Pago', 'Monto']],
       body: gastos.map((t) => [
-        t.observacion || t.categoria,
+        t.miembro_id ? (miembroMap.get(t.miembro_id) || '—') : '—',
         new Date(t.fecha).toLocaleDateString('es-CO'),
         t.categoria,
         t.forma_pago,
-        `$${Number(t.monto).toLocaleString('es-CO')}`,
+        `${Number(t.monto).toLocaleString('es-CO')}`,
       ]),
       headStyles: { fillColor: [239, 68, 68] },
+      styles: { fontSize: 9 },
+    });
+
+    // Membresía por sociedad
+    const sociedades = ['Caballero', 'Dama', 'Joven', 'Niños'] as const;
+    const conteoSociedad = sociedades.map((s) => ({
+      label: s,
+      count: miembros.filter((m) => m.sociedad === s).length,
+    }));
+    autoTable(doc, {
+      startY: (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10,
+      head: [['Membresía por Sociedad', 'Cantidad']],
+      body: conteoSociedad.map((s) => [s.label, String(s.count)]),
+      headStyles: { fillColor: [30, 58, 138] },
       styles: { fontSize: 9 },
     });
 
@@ -186,6 +212,31 @@ export default function InformeMensual({ onNavigate }: Props) {
                 <span className="text-gray-500">Gastos</span>
                 <span className="text-red-600 font-medium">{gastos.length} registros</span>
               </div>
+            </div>
+          </div>
+
+          {/* Membresía por sociedad */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5 text-[#1E3A8A]" />
+              <span className="text-sm font-medium text-gray-700">Membresía por Sociedad</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {(['Caballero', 'Dama', 'Joven', 'Niños'] as const).map((s) => {
+                const count = miembros.filter((m) => m.sociedad === s).length;
+                const colors: Record<string, string> = {
+                  'Caballero': 'bg-blue-50 text-blue-700',
+                  'Dama': 'bg-rose-50 text-rose-700',
+                  'Joven': 'bg-emerald-50 text-emerald-700',
+                  'Niños': 'bg-amber-50 text-amber-700',
+                };
+                return (
+                  <div key={s} className={`rounded-xl p-3 ${colors[s]}`}>
+                    <p className="text-xs font-medium opacity-80">{s}</p>
+                    <p className="text-xl font-bold">{count}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

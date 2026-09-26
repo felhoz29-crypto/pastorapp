@@ -5,7 +5,7 @@ import type { Miembro, Seguimiento, Asistencia, Screen } from '@/types';
 import QRCode from 'qrcode';
 import {
   ArrowLeft, Phone, MessageCircle, QrCode, MapPin, Calendar,
-  Droplet, GraduationCap, Home, Wallet, Clock, Plus, X, Loader2, NotebookPen,
+  Droplet, GraduationCap, Home, Wallet, Clock, Plus, X, Loader2, NotebookPen, Users,
 } from 'lucide-react';
 
 interface Props {
@@ -166,6 +166,11 @@ export default function FichaMiembro({ onNavigate, miembroId }: Props) {
           {miembro.celula && (
             <span className="text-xs px-3 py-1 rounded-full bg-amber-50 text-amber-600 font-medium flex items-center gap-1">
               <Home className="w-3 h-3" /> {miembro.celula}
+            </span>
+          )}
+          {miembro.sociedad && (
+            <span className="text-xs px-3 py-1 rounded-full bg-purple-50 text-purple-600 font-medium flex items-center gap-1">
+              <Users className="w-3 h-3" /> {miembro.sociedad}
             </span>
           )}
         </div>

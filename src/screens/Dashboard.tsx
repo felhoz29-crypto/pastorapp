@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import type { Miembro, Transaccion, Asistencia } from '@/types';
 import type { Screen } from '@/types';
 import {
-  TrendingUp, TrendingDown, Wallet, Users, AlertTriangle,
+  TrendingUp, TrendingDown, Wallet, Users, AlertTriangle, Cake,
   Plus, ScanLine, FileText, ArrowUpRight, ArrowDownRight, Download,
 } from 'lucide-react';
 
@@ -24,6 +24,7 @@ export default function Dashboard({ onNavigate }: Props) {
   const [gastos, setGastos] = useState(0);
   const [asistenciaUltima, setAsistenciaUltima] = useState<Asistencia | null>(null);
   const [alertas, setAlertas] = useState<Miembro[]>([]);
+  const [cumpleaneros, setCumpleaneros] = useState<Miembro[]>([]);
   const [totalMiembros, setTotalMiembros] = useState(0);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -74,7 +75,7 @@ export default function Dashboard({ onNavigate }: Props) {
           .maybeSingle(),
         supabase
           .from('miembros')
-          .select('id, nombre, fecha_ultima_asistencia')
+          .select('id, nombre, fecha_ultima_asistencia, fecha_nacimiento')
           .eq('iglesia_id', iglesia.id)
           .eq('estado', 'activo'),
       ]);
@@ -97,10 +98,27 @@ export default function Dashboard({ onNavigate }: Props) {
       });
       setAlertas(ausentes as Miembro[]);
 
+      const hoy = new Date();
+      const en7 = new Date(hoy.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const cumpleanos = (miembrosRes.data || []).filter((m) => {
+        if (!m.fecha_nacimiento) return false;
+        const nac = new Date(m.fecha_nacimiento);
+        const esteAno = new Date(hoy.getFullYear(), nac.getMonth(), nac.getDate());
+        const proxAno = new Date(hoy.getFullYear() + 1, nac.getMonth(), nac.getDate());
+        const cumpleEsteAno = esteAno >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+          && esteAno <= new Date(hoy.getFullYear(), en7.getMonth(), en7.getDate());
+        const cumpleProxAno = esteAno < new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+          && proxAno <= new Date(hoy.getFullYear(), en7.getMonth(), en7.getDate())
+          && proxAno >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        return cumpleEsteAno || cumpleProxAno;
+      });
+      setCumpleaneros(cumpleanos as Miembro[]);
+
       setLoading(false);
     })();
   }, [iglesia]);
 
+  const hoy = new Date();
   const saldo = ingresos - gastos;
 
   const handleInstall = async () => {
@@ -191,11 +209,45 @@ export default function Dashboard({ onNavigate }: Props) {
         </div>
       </div>
 
+      {/* Cumpleaños próximos */}
+      <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl shadow-sm border border-pink-100 p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Cake className="w-5 h-5 text-rose-500" />
+          <h2 className="text-sm font-semibold text-gray-700">Cumpleaños próximos 7 días</h2>
+          <span className="ml-auto text-xs text-rose-500 font-semibold">{cumpleaneros.length} miembros</span>
+        </div>
+
+        {cumpleaneros.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No hay cumpleaños en los próximos 7 días</p>
+        ) : (
+          <div className="space-y-2">
+            {cumpleaneros.map((m) => {
+              const nac = new Date(m.fecha_nacimiento!);
+              const esteAno = new Date(hoy.getFullYear(), nac.getMonth(), nac.getDate());
+              const fechaCumple = esteAno >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+                ? esteAno
+                : new Date(hoy.getFullYear() + 1, nac.getMonth(), nac.getDate());
+              return (
+                <div key={m.id} className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                  <div className="w-9 h-9 rounded-full bg-rose-200 flex items-center justify-center text-rose-800 font-semibold text-sm">
+                    {m.nombre.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{m.nombre}</p>
+                    <p className="text-xs text-gray-500">{fechaCumple.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Alerts */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="w-5 h-5 text-amber-500" />
-          <h2 className="text-sm font-semibold text-gray-700">Alertas de Asistencia</h2>
+          <h2 className="text-sm font-semibold text-gray-700">Alertas de Inasistencia</h2>
           <span className="ml-auto text-xs text-gray-400">{alertas.length} miembros</span>
         </div>
 

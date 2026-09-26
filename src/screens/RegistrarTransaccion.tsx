@@ -31,6 +31,25 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
 
   const categoriasIngreso = ['Diezmo', 'Ofrenda', 'Primicia', 'Pacto', 'Pro-fondos', 'Pro-templo', 'Otras ofrendas', 'Otros'];
   const categoriasGasto = ['Arriendo', 'Servicios', 'Transportes', 'Músicos', 'Predicadores', 'Papelería', 'Aseo', 'Mantenimiento', 'Otros'];
+
+  const coloresCategorias: Record<string, string> = {
+    'Diezmo': 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
+    'Ofrenda': 'bg-teal-100 text-teal-800 hover:bg-teal-200',
+    'Primicia': 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200',
+    'Pacto': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+    'Pro-fondos': 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200',
+    'Pro-templo': 'bg-sky-100 text-sky-800 hover:bg-sky-200',
+    'Otras ofrendas': 'bg-violet-100 text-violet-800 hover:bg-violet-200',
+    'Arriendo': 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+    'Servicios': 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+    'Transportes': 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+    'Músicos': 'bg-fuchsia-100 text-fuchsia-800 hover:bg-fuchsia-200',
+    'Predicadores': 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+    'Papelería': 'bg-lime-100 text-lime-800 hover:bg-lime-200',
+    'Aseo': 'bg-green-100 text-green-800 hover:bg-green-200',
+    'Mantenimiento': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+    'Otros': 'bg-gray-200 text-gray-700 hover:bg-gray-300',
+  };
   const [categoriaPersonalizada, setCategoriaPersonalizada] = useState('');
 
   useEffect(() => {
@@ -177,7 +196,7 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 categoria === c
                   ? 'bg-[#1E3A8A] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : coloresCategorias[c] || 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {c}

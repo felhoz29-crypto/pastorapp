@@ -29,8 +29,9 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
   const [saving, setSaving] = useState(false);
   const [searching, setSearching] = useState(false);
 
-  const categoriasIngreso = ['Diezmo', 'Ofrenda', 'Primicia'];
-  const categoriasGasto = ['Arriendo', 'Servicios', 'Otros'];
+  const categoriasIngreso = ['Diezmo', 'Ofrenda', 'Primicia', 'Pacto', 'Pro-fondos', 'Pro-templo', 'Otras ofrendas', 'Otros'];
+  const categoriasGasto = ['Arriendo', 'Servicios', 'Transportes', 'Músicos', 'Predicadores', 'Papelería', 'Aseo', 'Mantenimiento', 'Otros'];
+  const [categoriaPersonalizada, setCategoriaPersonalizada] = useState('');
 
   useEffect(() => {
     if (tipo === 'ingreso') {
@@ -38,6 +39,7 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
     } else {
       setCategoria('Arriendo');
     }
+    setCategoriaPersonalizada('');
   }, [tipo]);
 
   useEffect(() => {
@@ -85,10 +87,12 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
         }
       }
 
+      const categoriaFinal = categoria === 'Otros' && categoriaPersonalizada.trim() ? categoriaPersonalizada.trim() : categoria;
+
       const { error } = await supabase.from('transacciones').insert({
         iglesia_id: iglesia.id,
         tipo,
-        categoria,
+        categoria: categoriaFinal,
         monto: Number(monto),
         miembro_id: miembroSeleccionado?.id || null,
         fecha,
@@ -109,7 +113,7 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
 
       if (enviarWhatsApp && tipo === 'ingreso' && miembroSeleccionado) {
         const msg = encodeURIComponent(
-          `Hola ${miembroSeleccionado.nombre}, recibimos tu ${categoria.toLowerCase()} de $${Number(monto).toLocaleString('es-CO')} - ${iglesia.nombre}`
+          `Hola ${miembroSeleccionado.nombre}, recibimos tu ${categoriaFinal.toLowerCase()} de ${Number(monto).toLocaleString('es-CO')} - ${iglesia.nombre}`
         );
         const phone = miembroSeleccionado.celular.replace(/\D/g, '');
         window.open(`https://wa.me/57${phone}?text=${msg}`, '_blank');
@@ -180,6 +184,15 @@ export default function RegistrarTransaccion({ onNavigate, tipoInicial = 'ingres
             </button>
           ))}
         </div>
+        {categoria === 'Otros' && (
+          <input
+            type="text"
+            value={categoriaPersonalizada}
+            onChange={(e) => setCategoriaPersonalizada(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-gray-900 text-sm"
+            placeholder="Escribe el nombre de la categoría..."
+          />
+        )}
       </div>
 
       {/* Miembro search - only for ingresos */}

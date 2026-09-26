@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pastorapp-v1';
+const CACHE_NAME = 'ekkles-v1';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (event) => {

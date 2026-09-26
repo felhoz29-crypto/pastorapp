@@ -50,7 +50,7 @@ export default function InformeMensual({ onNavigate }: Props) {
     // Header
     doc.setFontSize(20);
     doc.setTextColor(30, 58, 138);
-    doc.text('PASTORAPP - Informe Mensual', 14, 22);
+    doc.text('Ekkles - Informe Mensual', 14, 22);
     doc.setFontSize(12);
     doc.setTextColor(100);
     doc.text(`${iglesia?.nombre || ''}`, 14, 30);

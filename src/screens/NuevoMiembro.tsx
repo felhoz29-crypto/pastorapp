@@ -28,7 +28,7 @@ export default function NuevoMiembro({ onNavigate }: Props) {
     setSaving(true);
 
     try {
-      const qrCode = `PASTORAPP-${iglesia.id.slice(0, 8)}-${Date.now().toString(36).toUpperCase()}`;
+      const qrCode = `EKKLES-${iglesia.id.slice(0, 8)}-${Date.now().toString(36).toUpperCase()}`;
 
       const { data, error } = await supabase
         .from('miembros')

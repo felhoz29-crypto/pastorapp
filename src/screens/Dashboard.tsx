@@ -105,7 +105,7 @@ export default function Dashboard({ onNavigate }: Props) {
 
   const handleInstall = async () => {
     if (!installPrompt) {
-      window.alert('Para instalar PASTORAPP, abre el menú del navegador y selecciona “Agregar a pantalla de inicio”.');
+      window.alert('Para instalar Ekkles, abre el menú del navegador y selecciona “Agregar a pantalla de inicio”.');
       return;
     }
     await installPrompt.prompt();

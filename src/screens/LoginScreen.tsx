@@ -73,7 +73,7 @@ export default function LoginScreen() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4 border border-white/20">
             <Church className="w-8 h-8 text-white" strokeWidth={2} />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">PASTORAPP</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Ekkles</h1>
           <p className="text-blue-200 text-sm mt-1">Gestión pastoral para Colombia</p>
         </div>
 

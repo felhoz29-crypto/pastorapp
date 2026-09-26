@@ -1,6 +1,6 @@
 {
-  "name": "PASTORAPP",
-  "short_name": "PASTORAPP",
+  "name": "Ekkles",
+  "short_name": "Ekkles",
   "description": "Gestión pastoral para iglesias en Colombia",
   "start_url": "/",
   "display": "standalone",

@@ -42,7 +42,7 @@ export default function AppShell({ current, onNavigate, children }: Props) {
             <Church className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">PASTORAPP</p>
+            <p className="text-white font-bold text-sm">Ekkles</p>
             <p className="text-blue-200 text-xs truncate max-w-[140px]">{iglesia?.nombre}</p>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function AppShell({ current, onNavigate, children }: Props) {
       <div className="md:hidden fixed top-0 inset-x-0 z-30 bg-[#1E3A8A] px-4 py-3 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2">
           <Church className="w-6 h-6 text-white" />
-          <span className="text-white font-bold text-sm">PASTORAPP</span>
+          <span className="text-white font-bold text-sm">Ekkles</span>
         </div>
         <button onClick={() => setMenuOpen(!menuOpen)} className="text-white p-1">
           {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

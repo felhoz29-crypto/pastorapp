@@ -51,7 +51,7 @@ export default function FichaMiembro({ onNavigate, miembroId }: Props) {
     if (!miembro) return;
     let code = miembro.qr_code;
     if (!code) {
-      code = `PASTORAPP-${iglesia!.id.slice(0, 8)}-${miembro.id.slice(0, 8)}`;
+      code = `EKKLES-${iglesia!.id.slice(0, 8)}-${miembro.id.slice(0, 8)}`;
       await supabase.from('miembros').update({ qr_code: code }).eq('id', miembro.id);
       setMiembro({ ...miembro, qr_code: code });
     }
